@@ -7,7 +7,6 @@ app = Flask(__name__)
 # def main():
 #     model = {"title": "Hello DevOps Fans."}
 #     return render_template('index.html', model=model)
-
 @app.route("/")
 def main():
     model = {"title":  "Hello Build Trigger."}
