@@ -37,15 +37,6 @@
 #          - Stops and removes the existing container (if running)
 #          - Starts a new container with the updated image
 #
-# Variables (Substitutions):
-#    _REGION   → Artifact Registry region (e.g., europe-west4)
-#    _ZONE     → Compute Engine zone (e.g., europe-west4-a)
-#    _VM_NAME  → Name of the target VM instance
-#
-# Built-in variables:
-#    $PROJECT_ID  → GCP project ID (auto-provided)
-#    $COMMIT_SHA  → Commit SHA used for image tagging
-#
 # Notes:
 # - The deployment is idempotent and safe to run multiple times.
 # - The VM must allow Docker and have permission to pull images.
@@ -55,47 +46,79 @@
 # GitHub → Cloud Build → Artifact Registry → Compute Engine VM
 # ------------------------------------------------------------
 
-substitutions:
-  _REGION: europe-west4
-  _ZONE: europe-west4-a
-  _VM_NAME: devops-vm
-  
-- name: 'gcr.io/cloud-builders/gcloud'
-  entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
+# cloudbuild.yaml
+steps:
+  # Step 1: Detect Project ID and allowed region/zone
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Detecting Project ID and allowed region..."
+        PROJECT_ID=$(gcloud config get-value project)
+        yes | gcloud services enable orgpolicy.googleapis.com --project=$PROJECT_ID --quiet
 
-      echo "Checking if VM exists..."
+        # Detect allowed lab region
+        ALLOWED_REGION=$(gcloud org-policies describe constraints/gcp.resourceLocations \
+          --project=$PROJECT_ID \
+          --format="value(spec.rules[0].values.allowedValues)" \
+          | grep -oP '(?<=in:)(us|europe)[a-z0-9-]+(?=-locations)' \
+          | head -n 1)
 
-      if gcloud compute instances describe ${_VM_NAME} --zone=${_ZONE} >/dev/null 2>&1; then
-        echo "VM exists → updating container"
+        # Pick first available zone alphabetically
+        ALLOWED_ZONE=$(gcloud compute zones list \
+          --filter="region:($ALLOWED_REGION) AND status:UP" \
+          --format="value(name)" \
+          | sort \
+          | head -n 1)
 
-        gcloud compute ssh ${_VM_NAME} --zone=${_ZONE} --command "
-          docker pull $IMAGE &&
-          docker stop app || true &&
-          docker rm app || true &&
-          docker run -d -p 80:80 --name app $IMAGE
-        "
+        echo "PROJECT_ID=$PROJECT_ID" > /workspace/env_vars.sh
+        echo "ALLOWED_REGION=$ALLOWED_REGION" >> /workspace/env_vars.sh
+        echo "ALLOWED_ZONE=$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
-      else
-        echo "VM does not exist → creating VM"
+  # Step 2: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '$ALLOWED_REGION-docker.pkg.dev/$Project_ID/devops-repo/devops-image:$COMMIT_SHA', '.']
 
-        gcloud compute instances create ${_VM_NAME} \
-          --zone=${_ZONE} \
-          --machine-type=e2-medium \
-          --image-family=debian-11 \
-          --image-project=debian-cloud \
-          --tags=http-server
+  # Step 3: Create or redeploy VM
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars.sh
+        VM_NAME="devop-vm"
+        IMAGE="$ALLOWED_REGION-docker.pkg.dev/$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
+        # Check if VM exists
+        gcloud compute instances describe $VM_NAME --zone=$ALLOWED_ZONE >/dev/null 2>&1
+        if [ $? -eq 0 ]; then
+          echo "VM $VM_NAME exists → redeploying Docker container"
+          gcloud compute ssh $VM_NAME --zone=$ALLOWED_ZONE --command "
+            docker pull $IMAGE &&
+            docker stop app || true &&
+            docker rm app || true &&
+            docker run -d -p 80:80 --name app $IMAGE
+          "
+        else
+          echo "VM $VM_NAME does not exist → creating VM"
+          gcloud compute instances create $VM_NAME \
+            --zone=$ALLOWED_ZONE \
+            --machine-type=e2-medium \
+            --image-family=debian-11 \
+            --image-project=debian-cloud \
+            --tags=http-server,https-server
 
-        echo "Installing Docker and running container..."
+          echo "Installing Docker and running container on new VM"
+          gcloud compute ssh $VM_NAME --zone=$ALLOWED_ZONE --command "
+            sudo apt-get update &&
+            sudo apt-get install -y docker.io &&
+            sudo docker run -d -p 80:80 --name app $IMAGE
+          "
+        fi
+        
+# Optional: track the image in Cloud Build
+images:
+  - '$ALLOWED_REGION-docker.pkg.dev/$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA'
 
-        gcloud compute ssh ${_VM_NAME} --zone=${_ZONE} --command "
-          sudo apt update &&
-          sudo apt install -y docker.io &&
-          sudo usermod -aG docker \$USER &&
-          docker pull $IMAGE &&
-          docker run -d -p 80:80 --name app $IMAGE
-        "
-      fi
+options:
+  logging: CLOUD_LOGGING_ONLY
