@@ -9,4 +9,6 @@ RUN pip install gunicorn
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # ENV PORT=80  ## ChatGPT: Overriding PORT to 80 breaks GCP routing
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+# CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
+## ChatGPT: ${PORT:-8080} = “use PORT if set, otherwise 8080”
+CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 main:app
