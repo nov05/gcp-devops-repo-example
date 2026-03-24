@@ -1,9 +1,11 @@
+## Created by Nov05, 2026-03-23
+
 # FROM python:3.13
 # WORKDIR /app
 # COPY . .
 # RUN pip install gunicorn
 # RUN pip install -r requirements.txt
-# ENV PORT=80  ## ChatGPT: Overriding PORT to 80 breaks GCP routing
+# ENV PORT=80 
 # CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 main:app
 
 # Use a stable, lightweight Python image
@@ -24,4 +26,5 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy the rest of the app
 COPY . .
 # Use PORT from environment (Cloud Run injects it)
-CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 main:app
+CMD exec gunicorn --bind :${PORT:-80} --workers 1 --threads 8 main:app
+# CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 main:app
