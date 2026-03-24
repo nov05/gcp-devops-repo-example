@@ -1,0 +1,7 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'europe-west4-docker.pkg.dev/qwiklabs-gcp-03-c292a83c0ab7/devops-repo/devops-image:$COMMIT_SHA', '.']
+images:
+  - 'europe-west4-docker.pkg.dev/qwiklabs-gcp-03-c292a83c0ab7/devops-repo/devops-image:$COMMIT_SHA'
+options:
+  logging: CLOUD_LOGGING_ONLY
