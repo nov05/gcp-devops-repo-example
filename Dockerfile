@@ -26,5 +26,5 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy the rest of the app
 COPY . .
 # Use PORT from environment (Cloud Run injects it)
-CMD exec gunicorn --bind :${PORT:-80} --workers 1 --threads 8 main:app
-# CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 main:app
+ENV PORT=80
+CMD exec gunicorn --bind :${PORT:-8080} --workers 1 --threads 8 main:app
