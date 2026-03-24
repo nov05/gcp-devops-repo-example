@@ -78,7 +78,16 @@ steps:
 
   # Step 2: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '$ALLOWED_REGION-docker.pkg.dev/$Project_ID/devops-repo/devops-image:$COMMIT_SHA', '.']
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars.sh
+        IMAGE="$ALLOWED_REGION-docker.pkg.dev/$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
+        echo "Building Docker image: $IMAGE"
+        docker build -t "$IMAGE" .
+        echo "Pushing Docker image: $IMAGE"
+        docker push "$IMAGE"
 
   # Step 3: Create or redeploy VM
   - name: 'gcr.io/cloud-builders/gcloud'
