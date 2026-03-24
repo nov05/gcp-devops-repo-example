@@ -3,15 +3,15 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# @app.route("/")
-# def main():
-#     model = {"title": "Hello DevOps Fans."}
-#     return render_template('index.html', model=model)
-
 @app.route("/")
 def main():
-    model = {"title":  "Hello Build Trigger."}
-    return render_template("index.html", model=model)
+    model = {"title": "Hello DevOps Fans."}
+    return render_template('index.html', model=model)
+
+# @app.route("/")
+# def main():
+#     model = {"title":  "Hello Build Trigger."}
+#     return render_template("index.html", model=model)
 
 
 if __name__ == "__main__":
