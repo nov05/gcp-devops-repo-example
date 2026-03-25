@@ -41,7 +41,7 @@ else
 
     echo "👉 Installing Docker and Nginx on new VM..."
     # Copy the setup script to the VM
-    gcloud compute scp setup_vm.sh "$VM_NAME":~/setup_vm.sh --zone="$ALLOWED_ZONE"
+    gcloud compute scp /workspace/scripts/setup_vm.sh "$VM_NAME":~/setup_vm.sh --zone="$ALLOWED_ZONE"
     # Run the script on the VM
     gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "bash ~/setup_vm.sh"
 fi
