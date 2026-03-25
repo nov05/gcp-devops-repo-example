@@ -60,7 +60,7 @@ else
             -subj \"/C=US/ST=State/L=City/O=DevOps/OU=IT/CN=\$(curl -s ifconfig.me)\"
 
         # Configure Nginx reverse proxy
-        sudo bash -c 'cat > /etc/nginx/sites-available/app <<EOF
+        sudo bash -c 'cat > /etc/nginx/sites-available/app <<'EOF'
 server {
     listen 80;
     listen 443 ssl;
@@ -75,7 +75,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-EOF'
+EOF
         sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
         sudo nginx -t
         sudo systemctl restart nginx
