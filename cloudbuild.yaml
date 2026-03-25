@@ -67,7 +67,7 @@ steps:
         echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
         echo "👉 $$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
 
-  # Step 3: Create or redeploy VM
+  # Step 3: Create or re-deploy VM
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args: ['./scripts/deploy_vm.sh']
