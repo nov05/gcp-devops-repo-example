@@ -19,7 +19,7 @@ sudo systemctl start docker
 sudo usermod -aG docker $USER || true
 
 # Authenticate Docker with Artifact Registry
-sudo gcloud auth configure-docker $ALLOWED_REGION-docker.pkg.dev --quiet
+sudo gcloud auth configure-docker ${ALLOWED_REGION}-docker.pkg.dev --quiet
 
 # Run Docker container on internal port 8080 (avoid conflicts)
 echo "👉 Running Docker container on port 8080..."
