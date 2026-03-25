@@ -83,6 +83,7 @@ steps:
         # Optional: track the image in Cloud Build
         gcloud builds add-iam-policy-binding $BUILD_ID \
           --artifact="$$IMAGE"
+        echo "COMMIT_SHA=$COMMIT_SHA" >> /workspace/env_vars.sh
         echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
         echo "👉 $$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
 
