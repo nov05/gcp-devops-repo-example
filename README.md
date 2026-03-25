@@ -11,7 +11,7 @@
       Task 5. Automate builds with triggers  
       Task 6. Test your build changes  
 
-  However, I created a **cloudbuild.yaml** with 4 steps:
+  However, I created a **cloudbuild.yaml** with 4 steps. Once a change is pushed to the repo, the trigger will run, and **Cloud Build** will take care of everything. In the end, you’ll be able to access the "Hello, Build Trigger" webpage of the app in your browser via HTTP or HTTPS.   
   
       Step 1. Detect project, allowed region, allowed zones   
       Step 2. Create Docker image   
