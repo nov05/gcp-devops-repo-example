@@ -46,23 +46,23 @@ steps:
       - '-c'
       - |
         echo "Detecting Project ID and allowed region..."
-        PROJECT_ID=$(gcloud config get-value project)
+        PROJECT_ID=$$(gcloud config get-value project)
         yes | gcloud services enable orgpolicy.googleapis.com --project=$PROJECT_ID --quiet
         # Detect allowed lab region
-        ALLOWED_REGION=$(gcloud org-policies describe constraints/gcp.resourceLocations \
+        ALLOWED_REGION=$$(gcloud org-policies describe constraints/gcp.resourceLocations \
           --project=$PROJECT_ID \
           --format="value(spec.rules[0].values.allowedValues)" \
           | grep -oP '(?<=in:)(us|europe)[a-z0-9-]+(?=-locations)' \
           | head -n 1)
         # Pick first available zone alphabetically
-        ALLOWED_ZONE=$(gcloud compute zones list \
+        ALLOWED_ZONE=$$(gcloud compute zones list \
           --filter="region:($ALLOWED_REGION) AND status:UP" \
           --format="value(name)" \
           | sort \
           | head -n 1)
-        echo "PROJECT_ID=$PROJECT_ID" > /workspace/env_vars.sh
-        echo "ALLOWED_REGION=$ALLOWED_REGION" >> /workspace/env_vars.sh
-        echo "ALLOWED_ZONE=$ALLOWED_ZONE" >> /workspace/env_vars.sh
+        echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
+        echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
+        echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
   # # Step 2: Build Docker image
   # - name: 'gcr.io/cloud-builders/docker'
