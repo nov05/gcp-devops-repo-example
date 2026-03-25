@@ -64,9 +64,9 @@ steps:
           --format="value(name)" \
           | sort \
           | head -n 1)
-        echo "👉 PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
-        echo "👉 ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
-        echo "👉 ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
+        echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
+        echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
+        echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
   # Step 2: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -124,7 +124,7 @@ steps:
           "
         fi
         echo "👉 $$(date) - Deploying commit $COMMIT_SHA to VM $$VM_NAME in zone $$ALLOWED_ZONE" | tee -a /workspace/deployment.log
-        echo "👉 $$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
+        echo "$$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
 
 options:
   logging: CLOUD_LOGGING_ONLY
