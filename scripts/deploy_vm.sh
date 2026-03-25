@@ -4,16 +4,13 @@ set -e
 
 # Load environment variables
 source /workspace/env_vars.sh
-
 VM_NAME="devops-vm"
 LOG_FILE="/workspace/deployment.log"
-
 echo "👉 Deploying commit $COMMIT_SHA to VM $VM_NAME in zone $ALLOWED_ZONE..." | tee -a "$LOG_FILE"
 
 # Check if VM exists
 if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/null 2>&1; then
     echo "👉 VM $VM_NAME exists → redeploying Docker container..."
-
     gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
         set -e
         sudo gcloud auth configure-docker $ALLOWED_REGION-docker.pkg.dev --quiet
@@ -24,7 +21,6 @@ if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/nul
     "
 else
     echo "👉 VM $VM_NAME does not exist → creating VM..."
-
     gcloud compute instances create "$VM_NAME" \
         --zone="$ALLOWED_ZONE" \
         --machine-type=e2-medium \
@@ -44,7 +40,6 @@ else
     done
 
     echo "👉 Installing Docker and Nginx on new VM..."
-
     gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
         set -e
         sudo apt-get update
@@ -81,7 +76,6 @@ server {
     }
 }
 EOF'
-
         sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
         sudo nginx -t
         sudo systemctl restart nginx
