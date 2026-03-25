@@ -138,6 +138,14 @@ steps:
             sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
             sudo docker pull $$IMAGE
             sudo docker run -d -p 80:80 --name app $$IMAGE
+
+            # Self-signed cert
+            sudo mkdir -p /etc/ssl/certs /etc/ssl/private
+            sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+              -keyout /etc/ssl/private/selfsigned.key \
+              -out /etc/ssl/certs/selfsigned.crt \
+              -subj \"/C=US/ST=State/L=City/O=DevOps/OU=IT/CN=$$(curl -s ifconfig.me)\"
+            
             # Configure Nginx reverse proxy
             sudo bash -c 'cat > /etc/nginx/sites-available/app <<EOF
 server {
