@@ -5,7 +5,6 @@ set -e
 # Load environment variables
 source /workspace/env_vars.sh
 VM_NAME="devops-vm"
-LOG_FILE="/workspace/deployment.log"
 echo "👉 Deploying commit $COMMIT_SHA to VM $VM_NAME in zone $ALLOWED_ZONE..." | tee -a "$LOG_FILE"
 
 # Check if VM exists
