@@ -7,11 +7,11 @@ source /workspace/env_vars.sh
 VM_NAME="devops-vm"
 LOG_FILE="/workspace/deployment.log"
 
-echo "👉 Deploying commit $COMMIT_SHA to VM $VM_NAME in zone $ALLOWED_ZONE" | tee -a "$LOG_FILE"
+echo "👉 Deploying commit $COMMIT_SHA to VM $VM_NAME in zone $ALLOWED_ZONE..." | tee -a "$LOG_FILE"
 
 # Check if VM exists
 if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/null 2>&1; then
-    echo "👉 VM $VM_NAME exists → redeploying Docker container"
+    echo "👉 VM $VM_NAME exists → redeploying Docker container..."
 
     gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
         set -e
@@ -22,7 +22,7 @@ if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/nul
         sudo docker run -d -p 80:80 -p 443:443 --name app $IMAGE
     "
 else
-    echo "👉 VM $VM_NAME does not exist → creating VM"
+    echo "👉 VM $VM_NAME does not exist → creating VM..."
 
     gcloud compute instances create "$VM_NAME" \
         --zone="$ALLOWED_ZONE" \
@@ -42,7 +42,7 @@ else
         sleep 10
     done
 
-    echo "👉 Installing Docker and Nginx on new VM"
+    echo "👉 Installing Docker and Nginx on new VM..."
 
     gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
         set -e
