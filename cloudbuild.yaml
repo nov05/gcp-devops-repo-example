@@ -73,7 +73,7 @@ steps:
         source /workspace/env_vars.sh
         IMAGE="$$ALLOWED_REGION-docker.pkg.dev/$$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
         echo "Building Docker image: $$IMAGE"
-        docker build -t "$IMAGE" .
+        docker build -t "$$IMAGE" .
         echo "Pushing Docker image: $$IMAGE"
         docker push "$$IMAGE"
         # Optional: track the image in Cloud Build
