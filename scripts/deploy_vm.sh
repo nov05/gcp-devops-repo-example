@@ -1,4 +1,5 @@
 #!/bin/bash
+# Exit immediately if any command in the script returns a non-zero status (i.e., fails).
 set -e
 
 # Load environment variables
