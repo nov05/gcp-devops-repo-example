@@ -115,7 +115,14 @@ steps:
             --image-project=debian-cloud \
             --tags=http-server,https-server \
             --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
-
+            
+          echo "👉 Waiting for SSH to become available..."
+          for i in {1..10}; do
+            gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "echo SSH ready" >/dev/null 2>&1 && break
+            echo "SSH not ready yet... retrying in 10s"
+            sleep 10
+          done
+          
           echo "👉 Installing Docker and running container on new VM"
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             sudo apt-get update &&
