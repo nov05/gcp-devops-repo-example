@@ -64,23 +64,23 @@ steps:
         echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
         echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
-  # # Step 2: Build Docker image
-  # - name: 'gcr.io/cloud-builders/docker'
-  #   entrypoint: 'bash'
-  #   args:
-  #     - '-c'
-  #     - |
-  #       source /workspace/env_vars.sh
-  #       IMAGE="$ALLOWED_REGION-docker.pkg.dev/$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
-  #       echo "Building Docker image: $IMAGE"
-  #       docker build -t "$IMAGE" .
-  #       echo "Pushing Docker image: $IMAGE"
-  #       docker push "$IMAGE"
-  #       # Optional: track the image in Cloud Build
-  #       gcloud builds add-iam-policy-binding $BUILD_ID \
-  #         --artifact="$IMAGE"
-  #       echo "IMAGE=$IMAGE" >> /workspace/env_vars.sh
-  #       echo "$(date) - Building Docker image for commit $COMMIT_SHA: $IMAGE" | tee -a /workspace/deployment.log
+  # Step 2: Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/env_vars.sh
+        IMAGE="$$ALLOWED_REGION-docker.pkg.dev/$$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
+        echo "Building Docker image: $$IMAGE"
+        docker build -t "$IMAGE" .
+        echo "Pushing Docker image: $$IMAGE"
+        docker push "$$IMAGE"
+        # Optional: track the image in Cloud Build
+        gcloud builds add-iam-policy-binding $BUILD_ID \
+          --artifact="$$IMAGE"
+        echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
+        echo "$$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
 
   # # Step 3: Create or redeploy VM
   # - name: 'gcr.io/cloud-builders/gcloud'
