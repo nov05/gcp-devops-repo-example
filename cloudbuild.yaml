@@ -33,6 +33,9 @@
 # - Firewall rules may be required to expose the application (e.g., port 80).
 # - $PROJECT_ID, $COMMIT_SHA, $BUILD_ID, and similar variables are built-in substitutions. 
 #   Other variables like $$ALLOWED_REGION are not built-in and require $$ to escape.
+# - Avoid using emojis in echo commands in real-world scenarios to maintain 
+#   compatibility with environments that may not fully support UTF-8 encoding. 
+#   They’re fine here for better visualization and a bit of fun.
 #
 # This setup provides a simple CI/CD pipeline:
 # GitHub → Cloud Build → Artifact Registry → Compute Engine VM
@@ -46,7 +49,7 @@ steps:
     args:
       - '-c'
       - |
-        echo "Detecting Project ID and allowed region..."
+        echo "👉 Detecting Project ID and allowed region..."
         PROJECT_ID=$$(gcloud config get-value project)
         yes | gcloud services enable orgpolicy.googleapis.com --project=$$PROJECT_ID --quiet
         # Detect allowed lab region
@@ -61,9 +64,9 @@ steps:
           --format="value(name)" \
           | sort \
           | head -n 1)
-        echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
-        echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
-        echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
+        echo "👉 PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
+        echo "👉 ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
+        echo "👉 ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
   # Step 2: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -73,15 +76,15 @@ steps:
       - |
         source /workspace/env_vars.sh
         IMAGE="$$ALLOWED_REGION-docker.pkg.dev/$$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
-        echo "Building Docker image: $$IMAGE"
+        echo "👉 Building Docker image: $$IMAGE"
         docker build -t "$$IMAGE" .
-        echo "Pushing Docker image: $$IMAGE"
+        echo "👉 Pushing Docker image: $$IMAGE"
         docker push "$$IMAGE"
         # Optional: track the image in Cloud Build
         gcloud builds add-iam-policy-binding $BUILD_ID \
           --artifact="$$IMAGE"
         echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
-        echo "$$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
+        echo "👉 $$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
 
   # Step 3: Create or redeploy VM
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -96,7 +99,7 @@ steps:
         # Check if VM exists
         gcloud compute instances describe $$VM_NAME --zone=$$ALLOWED_ZONE >/dev/null 2>&1
         if [ $? -eq 0 ]; then
-          echo "VM $$VM_NAME exists → redeploying Docker container"
+          echo "👉 VM $$VM_NAME exists → redeploying Docker container"
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             docker pull $$IMAGE &&
             docker stop app || true &&
@@ -104,24 +107,24 @@ steps:
             docker run -d -p 80:80 --name app $$IMAGE
           "
         else
-          echo "VM $$VM_NAME does not exist → creating VM"
+          echo "👉 VM $$VM_NAME does not exist → creating VM"
           gcloud compute instances create $$VM_NAME \
             --zone=$$ALLOWED_ZONE \
             --machine-type=e2-medium \
             --image-family=debian-11 \
             --image-project=debian-cloud \
-            --tags=http-server,https-server \  
+            --tags=http-server,https-server \
             --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
 
-          echo "Installing Docker and running container on new VM"
+          echo "👉 Installing Docker and running container on new VM"
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             sudo apt-get update &&
             sudo apt-get install -y docker.io &&
             sudo docker run -d -p 80:80 --name app $$IMAGE
           "
         fi
-        echo "$$(date) - Deploying commit $COMMIT_SHA to VM $$VM_NAME in zone $$ALLOWED_ZONE" | tee -a /workspace/deployment.log
-        echo "$$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
+        echo "👉 $$(date) - Deploying commit $COMMIT_SHA to VM $$VM_NAME in zone $$ALLOWED_ZONE" | tee -a /workspace/deployment.log
+        echo "👉 $$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
 
 options:
   logging: CLOUD_LOGGING_ONLY
