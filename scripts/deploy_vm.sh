@@ -11,14 +11,6 @@ echo "👉 Deploying commit $COMMIT_SHA to VM $VM_NAME in zone $ALLOWED_ZONE..."
 # Check if VM exists
 if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/null 2>&1; then
     echo "👉 VM $VM_NAME exists → redeploying Docker container..."
-    gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
-        set -e
-        sudo gcloud auth configure-docker $ALLOWED_REGION-docker.pkg.dev --quiet
-        sudo docker pull $IMAGE
-        sudo docker stop app || true
-        sudo docker rm app || true
-        sudo docker run -d -p 8080:80 --name app $IMAGE
-    "
 else
     echo "👉 VM $VM_NAME does not exist → creating VM..."
     gcloud compute instances create "$VM_NAME" \
