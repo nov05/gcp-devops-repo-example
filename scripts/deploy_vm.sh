@@ -20,7 +20,7 @@ if gcloud compute instances describe "$VM_NAME" --zone="$ALLOWED_ZONE" >/dev/nul
         sudo docker pull $IMAGE
         sudo docker stop app || true
         sudo docker rm app || true
-        sudo docker run -d -p 80:80 -p 443:443 --name app $IMAGE
+        sudo docker run -d -p 8080:80 --name app $IMAGE
     "
 else
     echo "👉 VM $VM_NAME does not exist → creating VM..."
@@ -55,7 +55,7 @@ else
 
         # Run Docker container
         sudo docker pull $IMAGE
-        sudo docker run -d -p 80:80 -p 443:443 --name app $IMAGE
+        sudo docker run -d -p 8080:80 --name app $IMAGE
 
         # Generate self-signed SSL cert
         sudo mkdir -p /etc/ssl/certs /etc/ssl/private
@@ -73,7 +73,7 @@ server {
     ssl_certificate_key /etc/ssl/private/selfsigned.key;
     server_name _;
     location / {
-        proxy_pass http://127.0.0.1:80;
+        proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
