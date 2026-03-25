@@ -56,3 +56,5 @@ EOF'
 sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
 sudo nginx -t
 sudo systemctl restart nginx
+
+echo "✅ setup_vm.sh completed successfully"
