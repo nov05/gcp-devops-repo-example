@@ -16,7 +16,7 @@
       Step 1. Detect the project, allowed region, and allowed zones      
       Step 2. Build the Docker image        
       Step 3. Create a VM instance, deploy the image, and configure an Nginx reverse proxy for HTTPS   
-          Or redeploy the image if the instance already exists      
+          Or re-deploy the image if the instance already exists      
       Step 4. Set up firewall rules to allow HTTP and HTTPS traffic       
 
   ✅ For detailed instructions, please refer to [the **Google Docs** file](https://docs.google.com/document/d/1nIz91opc7jwgZ_yi3YOq8nS45-WG25lwb2WHZ2I_-zY).
