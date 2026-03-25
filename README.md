@@ -1,6 +1,6 @@
-# Google Skills Lab - Building a DevOps Pipeline
+# Google Skills Lab - **Building a DevOps Pipeline**
 
-* Lab tasks ([Google Docs](https://docs.google.com/document/d/1nIz91opc7jwgZ_yi3YOq8nS45-WG25lwb2WHZ2I_-zY/edit?usp=sharing))
+* **Lab tasks** 
 
   The original lab tasks are:
   
@@ -19,6 +19,8 @@
           Or re-deploy the image if instance already exsits  
       Step 4. Create firewall rules for HTTP and HTTPS traffic     
 
-* Logs
+  ✅ For detailed instructions, please refer to [the **Google Docs** file](https://docs.google.com/document/d/1nIz91opc7jwgZ_yi3YOq8nS45-WG25lwb2WHZ2I_-zY).
+
+* **Logs**
   
 2026-03-24 repo created from GCP
