@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 source ~/env_vars.sh
-echo "👉 Running setup_vm.sh on $VM_NAME..." | tee -a "$LOG_FILE"
+echo "👉 Running setup_vm.sh on $VM_NAME..." 
 
 # Stop and remove existing container if exists
 if sudo docker ps -a --format '{{.Names}}' | grep -q '^app$'; then
