@@ -116,6 +116,7 @@ steps:
             --image-family=debian-11 \
             --image-project=debian-cloud \
             --tags=http-server,https-server \
+            --scopes=https://www.googleapis.com/auth/cloud-platform\
             --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
   
           echo "👉 Waiting for SSH to become available..."
