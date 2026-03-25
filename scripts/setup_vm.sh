@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source ~/env_vars.sh
 echo "👉 Running setup_vm.sh on $VM_NAME..." | tee -a "$LOG_FILE"
 
 # Stop and remove existing container if exists
