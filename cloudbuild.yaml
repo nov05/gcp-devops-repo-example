@@ -101,6 +101,7 @@ steps:
         if [ $? -eq 0 ]; then
           echo "👉 VM $$VM_NAME exists → redeploying Docker container"
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
+            gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet &&
             docker pull $$IMAGE &&
             docker stop app || true &&
             docker rm app || true &&
@@ -127,6 +128,8 @@ steps:
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             sudo apt-get update &&
             sudo apt-get install -y docker.io &&
+            gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet &&
+            sudo docker pull $$IMAGE &&
             sudo docker run -d -p 80:80 --name app $$IMAGE
           "
         fi
