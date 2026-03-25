@@ -46,27 +46,7 @@ steps:
   # Step 1: Detect Project ID and allowed region/zone
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "👉 Detecting Project ID and allowed region..."
-        PROJECT_ID=$$(gcloud config get-value project)
-        yes | gcloud services enable orgpolicy.googleapis.com --project=$$PROJECT_ID --quiet
-        # Detect allowed lab region
-        ALLOWED_REGION=$$(gcloud org-policies describe constraints/gcp.resourceLocations \
-          --project=$$PROJECT_ID \
-          --format="value(spec.rules[0].values.allowedValues)" \
-          | grep -oP '(?<=in:)(us|europe)[a-z0-9-]+(?=-locations)' \
-          | head -n 1)
-        # Pick first available zone alphabetically
-        ALLOWED_ZONE=$$(gcloud compute zones list \
-          --filter="region:($$ALLOWED_REGION) AND status:UP" \
-          --format="value(name)" \
-          | sort \
-          | head -n 1)
-        echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
-        echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
-        echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
+    args: ['./scripts/detect_project.sh']
 
   # Step 2: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
@@ -95,32 +75,7 @@ steps:
   # Step 4: Ensure firewall rule exists
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "👉 Ensuring HTTP firewall rule exist..."
-        if ! gcloud compute firewall-rules describe allow-http >/dev/null 2>&1; then
-          # Create HTTP firewall rule
-          gcloud compute firewall-rules create allow-http \
-            --allow tcp:80 \
-            --target-tags=http-server \
-            --description="Allow HTTP traffic" || echo "HTTP rule may already exist"
-          echo "Firewall rule created."
-        else
-          echo "Firewall rule already exists."
-        fi
-
-        echo "👉 Ensuring HTTPS firewall rule exist..."
-        if ! gcloud compute firewall-rules describe allow-https >/dev/null 2>&1; then
-          # Create HTTPS firewall rule
-          gcloud compute firewall-rules create allow-https \
-            --allow tcp:443 \
-            --target-tags=https-server \
-            --description="Allow HTTPS traffic" || echo "HTTPS rule may already exist"
-          echo "Firewall rule created."
-        else
-          echo "Firewall rule already exists."
-        fi
-        
+    args: ['./scripts/setup_firewall.sh']
+ 
 options:
   logging: CLOUD_LOGGING_ONLY
