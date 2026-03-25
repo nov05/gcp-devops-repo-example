@@ -2,7 +2,7 @@
 # Exit immediately if any command in the script returns a non-zero status (i.e., fails).
 set -e
 
-echo "👉 Detecting Project ID and allowed region..."
+echo "👉 Detecting Project ID, allowed region, and allowed zone..."
 
 PROJECT_ID=$(gcloud config get-value project)
 
@@ -26,4 +26,4 @@ echo "PROJECT_ID=$PROJECT_ID" > /workspace/env_vars.sh
 echo "ALLOWED_REGION=$ALLOWED_REGION" >> /workspace/env_vars.sh
 echo "ALLOWED_ZONE=$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
-echo "✅ Project ID and region detected: $PROJECT_ID, $ALLOWED_REGION, $ALLOWED_ZONE"
+echo "✅ Project ID, allowed region, and allowed zone detected: $PROJECT_ID, $ALLOWED_REGION, $ALLOWED_ZONE"
