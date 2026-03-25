@@ -25,5 +25,6 @@ ALLOWED_ZONE=$(gcloud compute zones list \
 echo "PROJECT_ID=$PROJECT_ID" > /workspace/env_vars.sh
 echo "ALLOWED_REGION=$ALLOWED_REGION" >> /workspace/env_vars.sh
 echo "ALLOWED_ZONE=$ALLOWED_ZONE" >> /workspace/env_vars.sh
+echo "LOG_FILE=/workspace/deployment.log" >> /workspace/env_vars.sh
 
 echo "✅ Project ID, allowed region, and allowed zone detected: $PROJECT_ID, $ALLOWED_REGION, $ALLOWED_ZONE"
