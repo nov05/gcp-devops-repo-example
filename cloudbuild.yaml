@@ -102,7 +102,7 @@ steps:
           echo "👉 VM $$VM_NAME exists → redeploying Docker container"
           gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             set -e
-            gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
+            sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
             sudo docker pull $$IMAGE
             sudo docker stop app || true
             sudo docker rm app || true
@@ -134,7 +134,7 @@ steps:
             sudo apt-get install -y docker.io
             sudo systemctl start docker
             sudo usermod -aG docker \$$USER
-            gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
+            sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
             sudo docker pull $$IMAGE
             sudo docker run -d -p 80:80 --name app $$IMAGE
           "
