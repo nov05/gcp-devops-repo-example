@@ -4,12 +4,12 @@
 
   The original lab tasks are:
   
-    Task 1. Create a Git repository  
-    Task 2. Create a simple Python application  
-    Task 3. Define a Docker build  
-    Task 4. Manage Docker images with Cloud Build and Artifact Registry  
-    Task 5. Automate builds with triggers  
-    Task 6. Test your build changes  
+      Task 1. Create a Git repository  
+      Task 2. Create a simple Python application  
+      Task 3. Define a Docker build  
+      Task 4. Manage Docker images with Cloud Build and Artifact Registry  
+      Task 5. Automate builds with triggers  
+      Task 6. Test your build changes  
 
   However, I created a **cloudbuild.yaml** with 4 steps:
   
