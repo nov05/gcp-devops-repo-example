@@ -13,11 +13,11 @@
 
   However, I created a **cloudbuild.yaml** with 4 steps:
   
-    Step 1. Detect project, allowed region, allowed zones   
-    Step 2. Create Docker image   
-    Step 3. Create a VM instance, deploy the image, set up Nginx reverse proxy for HTTPS  
-      Or re-deploy the image if instance already exsits  
-    Step 4. Create firewall rules for HTTP and HTTPS traffic     
+      Step 1. Detect project, allowed region, allowed zones   
+      Step 2. Create Docker image   
+      Step 3. Create a VM instance, deploy the image, set up Nginx reverse proxy for HTTPS  
+          Or re-deploy the image if instance already exsits  
+      Step 4. Create firewall rules for HTTP and HTTPS traffic     
 
 * Logs
   
