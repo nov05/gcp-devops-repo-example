@@ -43,106 +43,123 @@
 
 # cloudbuild.yaml
 steps:
-  # Step 1: Detect Project ID and allowed region/zone
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "👉 Detecting Project ID and allowed region..."
-        PROJECT_ID=$$(gcloud config get-value project)
-        yes | gcloud services enable orgpolicy.googleapis.com --project=$$PROJECT_ID --quiet
-        # Detect allowed lab region
-        ALLOWED_REGION=$$(gcloud org-policies describe constraints/gcp.resourceLocations \
-          --project=$$PROJECT_ID \
-          --format="value(spec.rules[0].values.allowedValues)" \
-          | grep -oP '(?<=in:)(us|europe)[a-z0-9-]+(?=-locations)' \
-          | head -n 1)
-        # Pick first available zone alphabetically
-        ALLOWED_ZONE=$$(gcloud compute zones list \
-          --filter="region:($$ALLOWED_REGION) AND status:UP" \
-          --format="value(name)" \
-          | sort \
-          | head -n 1)
-        echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
-        echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
-        echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
+  # # Step 1: Detect Project ID and allowed region/zone
+  # - name: 'gcr.io/cloud-builders/gcloud'
+  #   entrypoint: 'bash'
+  #   args:
+  #     - '-c'
+  #     - |
+  #       echo "👉 Detecting Project ID and allowed region..."
+  #       PROJECT_ID=$$(gcloud config get-value project)
+  #       yes | gcloud services enable orgpolicy.googleapis.com --project=$$PROJECT_ID --quiet
+  #       # Detect allowed lab region
+  #       ALLOWED_REGION=$$(gcloud org-policies describe constraints/gcp.resourceLocations \
+  #         --project=$$PROJECT_ID \
+  #         --format="value(spec.rules[0].values.allowedValues)" \
+  #         | grep -oP '(?<=in:)(us|europe)[a-z0-9-]+(?=-locations)' \
+  #         | head -n 1)
+  #       # Pick first available zone alphabetically
+  #       ALLOWED_ZONE=$$(gcloud compute zones list \
+  #         --filter="region:($$ALLOWED_REGION) AND status:UP" \
+  #         --format="value(name)" \
+  #         | sort \
+  #         | head -n 1)
+  #       echo "PROJECT_ID=$$PROJECT_ID" > /workspace/env_vars.sh
+  #       echo "ALLOWED_REGION=$$ALLOWED_REGION" >> /workspace/env_vars.sh
+  #       echo "ALLOWED_ZONE=$$ALLOWED_ZONE" >> /workspace/env_vars.sh
 
-  # Step 2: Build Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        source /workspace/env_vars.sh
-        IMAGE="$$ALLOWED_REGION-docker.pkg.dev/$$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
-        echo "👉 Building Docker image: $$IMAGE"
-        docker build -t "$$IMAGE" .
-        echo "👉 Pushing Docker image: $$IMAGE"
-        docker push "$$IMAGE"
-        # Optional: track the image in Cloud Build
-        gcloud builds add-iam-policy-binding $BUILD_ID \
-          --artifact="$$IMAGE"
-        echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
-        echo "👉 $$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
+  # # Step 2: Build Docker image
+  # - name: 'gcr.io/cloud-builders/docker'
+  #   entrypoint: 'bash'
+  #   args:
+  #     - '-c'
+  #     - |
+  #       source /workspace/env_vars.sh
+  #       IMAGE="$$ALLOWED_REGION-docker.pkg.dev/$$PROJECT_ID/devops-repo/devops-image:$COMMIT_SHA"
+  #       echo "👉 Building Docker image: $$IMAGE"
+  #       docker build -t "$$IMAGE" .
+  #       echo "👉 Pushing Docker image: $$IMAGE"
+  #       docker push "$$IMAGE"
+  #       # Optional: track the image in Cloud Build
+  #       gcloud builds add-iam-policy-binding $BUILD_ID \
+  #         --artifact="$$IMAGE"
+  #       echo "IMAGE=$$IMAGE" >> /workspace/env_vars.sh
+  #       echo "👉 $$(date) - Building Docker image for commit $COMMIT_SHA: $$IMAGE" | tee -a /workspace/deployment.log
 
-  # Step 3: Create or redeploy VM
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        set -e
-        source /workspace/env_vars.sh
-        VM_NAME="devop-vm"
-        LOG_FILE="/workspace/deployment.log"
+  # # Step 3: Create or redeploy VM
+  # - name: 'gcr.io/cloud-builders/gcloud'
+  #   entrypoint: 'bash'
+  #   args:
+  #     - '-c'
+  #     - |
+  #       set -e
+  #       source /workspace/env_vars.sh
+  #       VM_NAME="devops-vm"
+  #       LOG_FILE="/workspace/deployment.log"
   
-        # Check if VM exists
-        if gcloud compute instances describe $$VM_NAME --zone=$$ALLOWED_ZONE >/dev/null 2>&1; then
-          echo "👉 VM $$VM_NAME exists → redeploying Docker container"
-          gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
-            set -e
-            sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
-            sudo docker pull $$IMAGE
-            sudo docker stop app || true
-            sudo docker rm app || true
-            sudo docker run -d -p 80:80 --name app $$IMAGE
-          "
+  #       # Check if VM exists
+  #       if gcloud compute instances describe $$VM_NAME --zone=$$ALLOWED_ZONE >/dev/null 2>&1; then
+  #         echo "👉 VM $$VM_NAME exists → redeploying Docker container"
+  #         gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
+  #           set -e
+  #           sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
+  #           sudo docker pull $$IMAGE
+  #           sudo docker stop app || true
+  #           sudo docker rm app || true
+  #           sudo docker run -d -p 80:80 --name app $$IMAGE
+  #         "
+  #       else
+  #         echo "👉 VM $$VM_NAME does not exist → creating VM"
+  #         gcloud compute instances create $$VM_NAME \
+  #           --zone=$$ALLOWED_ZONE \
+  #           --machine-type=e2-medium \
+  #           --image-family=debian-12 \
+  #           --image-project=debian-cloud \
+  #           --tags=http-server,https-server \
+  #           --scopes=https://www.googleapis.com/auth/cloud-platform\
+  #           --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
+  
+  #         echo "👉 Waiting for SSH to become available..."
+  #         for i in {1..12}; do
+  #           if gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "echo ready" -q >/dev/null 2>&1; then
+  #             break
+  #           fi
+  #           echo "SSH not ready yet... retrying in 10s"
+  #           sleep 10
+  #         done
+  
+  #         echo "👉 Installing Docker and running container on new VM"
+  #         gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
+  #           set -e
+  #           sudo apt-get update
+  #           sudo apt-get install -y docker.io
+  #           sudo systemctl start docker
+  #           sudo usermod -aG docker \$$USER
+  #           sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
+  #           sudo docker pull $$IMAGE
+  #           sudo docker run -d -p 80:80 --name app $$IMAGE
+  #         "
+  #       fi
+  
+  #       echo "👉 $$(date) - Deploying commit $COMMIT_SHA to VM $$VM_NAME in zone $$ALLOWED_ZONE" | tee -a $$LOG_FILE
+  #       echo "$$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
+        
+  # Step 4: Ensure firewall rule exists
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "👉 Ensuring HTTP and HTTPS firewall rules exist..."
+        if ! gcloud compute firewall-rules describe allow-http-https >/dev/null 2>&1; then
+          gcloud compute firewall-rules create allow-http-https \
+            --allow tcp:80,tcp:443 \
+            --target-tags=http-server \
+            --description="Allow HTTP and HTTPS traffic"
+          echo "👉 Firewall rule created."
         else
-          echo "👉 VM $$VM_NAME does not exist → creating VM"
-          gcloud compute instances create $$VM_NAME \
-            --zone=$$ALLOWED_ZONE \
-            --machine-type=e2-medium \
-            --image-family=debian-11 \
-            --image-project=debian-cloud \
-            --tags=http-server,https-server \
-            --scopes=https://www.googleapis.com/auth/cloud-platform\
-            --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
-  
-          echo "👉 Waiting for SSH to become available..."
-          for i in {1..12}; do
-            if gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "echo ready" -q >/dev/null 2>&1; then
-              break
-            fi
-            echo "SSH not ready yet... retrying in 10s"
-            sleep 10
-          done
-  
-          echo "👉 Installing Docker and running container on new VM"
-          gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
-            set -e
-            sudo apt-get update
-            sudo apt-get install -y docker.io
-            sudo systemctl start docker
-            sudo usermod -aG docker \$$USER
-            sudo gcloud auth configure-docker $$ALLOWED_REGION-docker.pkg.dev --quiet
-            sudo docker pull $$IMAGE
-            sudo docker run -d -p 80:80 --name app $$IMAGE
-          "
+          echo "👉 Firewall rule already exists."
         fi
-  
-        echo "👉 $$(date) - Deploying commit $COMMIT_SHA to VM $$VM_NAME in zone $$ALLOWED_ZONE" | tee -a $$LOG_FILE
-        echo "$$VM_NAME,$$ALLOWED_ZONE,$$IMAGE" >> /workspace/deployed-vms.csv
 
 options:
   logging: CLOUD_LOGGING_ONLY
