@@ -114,7 +114,7 @@ steps:
             --labels=deployed-by=cloud-build,commit-sha=$COMMIT_SHA
 
           echo "Installing Docker and running container on new VM"
-          gcloud compute ssh $VM_NAME --zone=$$ALLOWED_ZONE --command "
+          gcloud compute ssh $$VM_NAME --zone=$$ALLOWED_ZONE --command "
             sudo apt-get update &&
             sudo apt-get install -y docker.io &&
             sudo docker run -d -p 80:80 --name app $$IMAGE
