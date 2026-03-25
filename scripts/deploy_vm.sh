@@ -40,46 +40,10 @@ else
     done
 
     echo "👉 Installing Docker and Nginx on new VM..."
-    gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "
-        set -e
-        sudo apt-get update
-        sudo apt-get install -y docker.io nginx openssl
-        sudo systemctl start docker
-        sudo usermod -aG docker \$USER
-        sudo gcloud auth configure-docker $ALLOWED_REGION-docker.pkg.dev --quiet
-
-        # Run Docker container
-        sudo docker pull $IMAGE
-        sudo docker run -d -p 8080:80 --name app $IMAGE
-
-        # Generate self-signed SSL cert
-        sudo mkdir -p /etc/ssl/certs /etc/ssl/private
-        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout /etc/ssl/private/selfsigned.key \
-            -out /etc/ssl/certs/selfsigned.crt \
-            -subj \"/C=US/ST=State/L=City/O=DevOps/OU=IT/CN=\$(curl -s ifconfig.me)\"
-
-        # Configure Nginx reverse proxy
-        sudo bash -c 'cat > /etc/nginx/sites-available/app <<'EOF'
-server {
-    listen 80;
-    listen 443 ssl;
-    ssl_certificate /etc/ssl/certs/selfsigned.crt;
-    ssl_certificate_key /etc/ssl/private/selfsigned.key;
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-EOF
-        sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
-        sudo nginx -t
-        sudo systemctl restart nginx
-    "
+    # Copy the setup script to the VM
+    gcloud compute scp setup_vm.sh "$VM_NAME":~/setup_vm.sh --zone="$ALLOWED_ZONE"
+    # Run the script on the VM
+    gcloud compute ssh "$VM_NAME" --zone="$ALLOWED_ZONE" --command "bash ~/setup_vm.sh"
 fi
 
 echo "✅ Deployment finished for $VM_NAME"
