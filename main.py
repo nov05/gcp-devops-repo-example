@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def main():
-#     model = {"title": "Hello DevOps Fans!"}
-    model = {"title":  "Hello Build Trigger!"}
+#     model = {"title": "Hello, DevOps Fans!"}
+    model = {"title":  "Hello, Build Trigger!"}
     return render_template("index.html", model=model)
  
  
