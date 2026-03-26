@@ -23,5 +23,5 @@
 
 ## 👉 **Logs**
 
-2026-03-25 demo video created [<img src="https://raw.githubusercontent.com/nov05/pictures/refs/heads/master/icons/youtube_red_2000x2000.png" width=30>](https://youtu.be/NstoD4M8Oig) 
+2026-03-25 demo video created [<img src="https://raw.githubusercontent.com/nov05/pictures/refs/heads/master/icons/youtube_red_2000x2000.png" width=30>](https://youtu.be/NstoD4M8Oig)     
 2026-03-24 repo created from GCP
