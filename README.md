@@ -11,7 +11,7 @@
       Task 5. Automate builds with triggers  
       Task 6. Test your build changes    
 
-  Instead of creating VM instances manually, I created a **cloudbuild.yaml** with 4 steps. Once a change is pushed to the repo, the trigger will run, and **Cloud Build** will take care of everything. In the end, you’ll be able to access the "Hello, Build Trigger" webpage of the app in your browser via HTTP or HTTPS.   
+  Instead of creating VM instances manually, I created a **cloudbuild.yaml** with 4 steps. Once a change is pushed to the repo, the trigger will run, and **Cloud Build** will take care of everything. In the end, you’ll be able to access the "Hello, Build Trigger!" webpage of the app in your browser via HTTP or HTTPS.   
   
       Step 1. Detect the project, allowed region, and allowed zones      
       Step 2. Build the Docker image        
