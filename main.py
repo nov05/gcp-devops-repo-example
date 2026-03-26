@@ -5,12 +5,12 @@ app = Flask(__name__)
 
 # @app.route("/")
 # def main():
-#     model = {"title": "Hello DevOps Fans."}
+#     model = {"title": "Hello DevOps Fans!"}
 #     return render_template('index.html', model=model)
 
 @app.route("/")
 def main():
-    model = {"title":  "Hello Build Trigger."}
+    model = {"title":  "Hello Build Trigger!"}
     return render_template("index.html", model=model)
  
  
