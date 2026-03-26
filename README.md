@@ -1,6 +1,6 @@
 # Google Skills Lab - **Building a DevOps Pipeline**
 
-* 👉 **Lab tasks** 
+## 👉 **Lab tasks** 
 
   The original lab tasks are:
   
@@ -21,7 +21,7 @@
 
   ✅ For detailed instructions, please refer to [the **Google Docs** file](https://docs.google.com/document/d/1nIz91opc7jwgZ_yi3YOq8nS45-WG25lwb2WHZ2I_-zY).
 
-* 👉 **Logs**
+## 👉 **Logs**
 
 2026-03-25 demo video created  
 2026-03-24 repo created from GCP
